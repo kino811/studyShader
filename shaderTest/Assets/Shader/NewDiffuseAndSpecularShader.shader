@@ -88,9 +88,11 @@ Shader "Custom/NewDiffuseAndSpecularShader"
 		// UNITY_APPLY_FOG(i.fogCoord, col);
 
 		// calculate specular light
-		float3 toCameraDir = normalize(i.toCameraDir); // renormalize
 		float3 normal = normalize(i.normal);	       // renormalize
-		float specular = pow(dot(toCameraDir, normal), _SpecularPowFactor);
+		float3 worldNormal = UnityObjectToWorldNormal(normal); // 월드공간상에서의 정점 노멀을 구함
+		float3 worldReflectLightDir = reflect(_WorldSpaceLightPos0.xyz, worldNormal);
+		float3 toCameraDir = normalize(i.toCameraDir); // renormalize
+		float specular = pow(dot(toCameraDir, worldReflectLightDir), _SpecularPowFactor);
 
 		// calculate light
 		// 0 ~ 1
