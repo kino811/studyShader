@@ -68,7 +68,7 @@ Shader "Custom/NewDiffuseAndSpecularShader"
 		// 참고) https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
 		//   _WorldSpaceLightPos0	float4	Directional lights: (world space direction, 0). Other lights: (world space position, 1).
 		// 난반사 최소값은 0
-		o.diffuse = max(0, dot(worldNormal, -_WorldSpaceLightPos0.xyz)) * _LightColor0;
+		o.diffuse = max(0, dot(worldNormal, -_WorldSpaceLightPos0.xyz));
 
 		// calculate about specular
 		// _WorldSpaceCameraPos :: 카메라의 월드포지션. 빌트인 쉐이더 변수
@@ -92,13 +92,17 @@ Shader "Custom/NewDiffuseAndSpecularShader"
 		float3 worldNormal = UnityObjectToWorldNormal(normal); // 월드공간상에서의 정점 노멀을 구함
 		float3 worldReflectLightDir = reflect(_WorldSpaceLightPos0.xyz, worldNormal);
 		float3 toCameraDir = normalize(i.toCameraDir); // renormalize
-		float specular = pow(dot(toCameraDir, worldReflectLightDir), _SpecularPowFactor);
+		float specular = 0;
+		float3 diffuse = i.diffuse;
 
-		// calculate light
-		// 0 ~ 1
-		float light = max(0, min(1, _AmbientLight + i.diffuse + specular));
+		// 난반사 있을시, 즉 빛을 받을시 정반사도 표시
+		if (diffuse.x > 0 || diffuse.y > 0 || diffuse.z > 0)
+		{
+		    specular = pow(dot(toCameraDir, worldReflectLightDir), _SpecularPowFactor);
+		}
 
 		// apply light
+		float3 light = diffuse + _AmbientLight + specular;
 		col.rgb *= light;
 
 		return col;
