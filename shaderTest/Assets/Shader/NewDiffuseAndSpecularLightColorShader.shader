@@ -54,7 +54,7 @@ Shader "Custom/NewDiffuseAndSpecularLightColorShader"
 		float3 worldNormal = UnityObjectToWorldNormal(v.normal); // 월드공간상에서의 정점 노멀을 구함
 
 		// calculate diffuse light
-		float lightDir = _WorldSpaceLightPos0.xyz;
+		float3 lightDir = _WorldSpaceLightPos0.xyz;
 		o.diffuse = dot(-lightDir, worldNormal);
 
 		// calculate about specular
@@ -79,7 +79,8 @@ Shader "Custom/NewDiffuseAndSpecularLightColorShader"
 		if (i.diffuse.x > 0)
 		{
 		    specular = pow(saturate(dot(reflection, -viewDir)), _SpecularPowFactor);
-		    // todo :: apply specular map texture
+		    fixed4 specularAlbedo = tex2D(_SpecularMapTex, i.uv);
+		    specular *= specularAlbedo.rgb;
 		}
 
 		// ambient
